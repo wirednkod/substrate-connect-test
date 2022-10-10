@@ -1,5 +1,6 @@
 import "regenerator-runtime/runtime"
 import { createScClient, WellKnownChain } from "@substrate/connect"
+import westmintSpecs from "./westend-westmint.json"
 import UI from "./view"
 
 interface UiElements {
@@ -25,9 +26,9 @@ window.onload = () => {
   const ui = new UI({ containerId: "messages" }, { loadTime })
   ui.showSyncing()
 
-  const polka = getStruct("polkadot")
   const west = getStruct("westend")
-
+  const westmint = getStruct("westmint")
+  
   const showStuffInUI = (who: UiElements, what: string) => {
     const json = JSON.parse(what)
     switch (json.event) {
@@ -54,10 +55,11 @@ window.onload = () => {
         if (who.best) who.best.innerText = JSON.stringify(json.bestBlockHash)
         break
       case "finalized":
-        if (who.finalized)
+        if (who.finalized) {
           who.finalized.innerText = JSON.stringify(
-            json.finalizedBlocksHashes.join(),
+            json.finalizedBlockHashes.join(),
           )
+        }
         break
     }
   }
@@ -65,20 +67,12 @@ window.onload = () => {
   void (async () => {
     try {
       const scClient = createScClient()
-      const polkadotChain = await scClient.addWellKnownChain(
-        WellKnownChain.polkadot,
-        function jsonRpcCallback(response) {
-          console.log("response", JSON.parse(response).params.result)
-          showStuffInUI(
-            polka,
-            JSON.stringify(JSON.parse(response).params.result),
-          )
-        },
-      )
-
       const westendChain = await scClient.addWellKnownChain(
         WellKnownChain.westend2,
         function jsonRpcCallback(response) {
+          if (!(JSON.parse(response).params?.result)) {
+            return
+          }
           showStuffInUI(
             west,
             JSON.stringify(JSON.parse(response).params.result),
@@ -86,10 +80,20 @@ window.onload = () => {
         },
       )
 
-      polkadotChain.sendJsonRpc(
+      const westmintChain = await scClient.addChain(
+        JSON.stringify(westmintSpecs),
+        function jsonRpcCallback(response) {
+          showStuffInUI(
+            westmint,
+            JSON.stringify(JSON.parse(response).params.result),
+          )
+        },
+      )
+
+      westendChain.sendJsonRpc(
         '{"jsonrpc":"2.0","id":"1","method":"chainHead_unstable_follow","params":[true]}',
       )
-      westendChain.sendJsonRpc(
+      westmintChain.sendJsonRpc(
         '{"jsonrpc":"2.0","id":"1","method":"chainHead_unstable_follow","params":[true]}',
       )
     } catch (error) {
