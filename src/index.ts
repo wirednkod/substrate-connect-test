@@ -1,6 +1,5 @@
 import "regenerator-runtime/runtime"
 import { createScClient, WellKnownChain } from "@substrate/connect"
-import westmintSpecs from "./westend-westmint.json"
 import UI from "./view"
 
 interface UiElements {
@@ -67,8 +66,14 @@ window.onload = () => {
   void (async () => {
     try {
       const scClient = createScClient()
-      const westendChain = await scClient.addWellKnownChain(
-        WellKnownChain.westend2,
+      // const scClient = createScClient({
+      //   forceEmbeddedNode: true,
+      //   embeddedNodeConfig: {
+      //     maxLogLevel: 4
+      //   }
+      // })
+      const mainChain = await scClient.addWellKnownChain(
+        WellKnownChain.polkadot,
         function jsonRpcCallback(response) {
           if (!(JSON.parse(response).params?.result)) {
             return
@@ -80,20 +85,7 @@ window.onload = () => {
         },
       )
 
-      const westmintChain = await scClient.addChain(
-        JSON.stringify(westmintSpecs),
-        function jsonRpcCallback(response) {
-          showStuffInUI(
-            westmint,
-            JSON.stringify(JSON.parse(response).params.result),
-          )
-        },
-      )
-
-      westendChain.sendJsonRpc(
-        '{"jsonrpc":"2.0","id":"1","method":"chainHead_unstable_follow","params":[true]}',
-      )
-      westmintChain.sendJsonRpc(
+      mainChain.sendJsonRpc(
         '{"jsonrpc":"2.0","id":"1","method":"chainHead_unstable_follow","params":[true]}',
       )
     } catch (error) {

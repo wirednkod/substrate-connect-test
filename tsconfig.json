@@ -12,5 +12,4 @@
     "module": "ES2015"
   },
   "include": ["src", "src/**/*.json"],
-  "references": [{ "path": "../../packages/connect" }]
 }
