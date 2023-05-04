@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "author": "Parity Team <admin@parity.io>",
   "license": "GPL-3.0-only",
+  "homepage": "https://wirednkod.github.io/substrate-connect-test",
   "browserslist": [
     "last 2 versions"
   ],
   "scripts": {
     "deep-clean": "yarn clean && rm -rf node_modules",
-    "clean": "rm -rf dist/ tsconfig.tsbuildinfo",
+    "clean": "rm -rf build/ tsconfig.tsbuildinfo",
     "typecheck": "tsc -b",
+    "predeploy": "yarn run build",
+    "deploy": "gh-pages -d build",
     "typecheck:watch": "tsc -b --watch",
     "build": "yarn clean && yarn typecheck && webpack",
     "dev": "yarn clean && webpack serve --config webpack.config.js",
@@ -32,6 +35,7 @@
   },
   "devDependencies": {
     "eslint": "^8.14.0",
+    "gh-pages": "^5.0.0",
     "webpack": "^5.73.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.9.2"
